@@ -186,7 +186,9 @@ class OrderForm extends React.Component {
   paymentMethodsOptionsForCollective = (paymentMethods, collective) => {
     return paymentMethods.map(pm => {
       const value = pm.uuid
-      const label = `💳  \xA0\xA0${collective.name} - ${get(pm, 'data.brand')} ${pm.name} - exp ${get(pm, 'data.expMonth')}/${get(pm, 'data.expYear')}`;
+      const brand = get(pm, 'data.brand') || get(pm, 'type');
+      const expiration = get(pm, 'expiryDate') || `${get(pm, 'data.expMonth')}/${get(pm, 'data.expYear')}`;
+      const label = `💳  \xA0\xA0${collective.name} - ${brand} ${pm.name} - exp ${expiration}`;
       const option = {};
       option[value] = label;
       return option;
@@ -200,14 +202,18 @@ class OrderForm extends React.Component {
 
     const collective = this.collectivesById[CollectiveId];
 
+    const filterPMs = (pms) => pms.filter(pm =>
+      (pm.service === 'stripe' ||
+       (pm.service === 'opencollective' && pm.type === 'prepaid')));
+
     if (collective) {
-      const paymentMethods = (collective.paymentMethods || []).filter(pm => pm.service === 'stripe');
+      const paymentMethods = filterPMs(collective.paymentMethods || []);
       paymentMethodsOptions = this.paymentMethodsOptionsForCollective(paymentMethods, collective);
     }
 
     if (LoggedInUser && CollectiveId !== LoggedInUser.CollectiveId) {
       const userCollective = this.collectivesById[LoggedInUser.CollectiveId];
-      const paymentMethods = (LoggedInUser.collective.paymentMethods || []).filter(pm => pm.service === 'stripe');
+      const paymentMethods = filterPMs(LoggedInUser.collective.paymentMethods || []);
       paymentMethodsOptions = [...paymentMethodsOptions, ... this.paymentMethodsOptionsForCollective(paymentMethods, userCollective)];
     }
 
@@ -427,7 +433,7 @@ class OrderForm extends React.Component {
           this.setState({ result: { error: intl.formatMessage(this.messages['prepaidcard.amounterror'])}});
           return false;
         }
-        newState.paymentMethod = { token: prepaidcard.token,  service: 'prepaid', uuid: prepaidcard.uuid };
+        newState.paymentMethod = { token: prepaidcard.token,  service: 'opencollective', type: 'prepaid', uuid: prepaidcard.uuid };
         this.setState(newState);
         return true;
 
