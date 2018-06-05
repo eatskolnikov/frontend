@@ -9,6 +9,8 @@ dependencies:
   cache_directories:
     - "~/cache"
     - "~/npm"
+    - node_modules
+    - opencollective-api/node_modules
 machine:
   node:
     version: 10.3.0
