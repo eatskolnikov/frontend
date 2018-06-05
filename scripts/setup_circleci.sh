@@ -2,7 +2,21 @@
 # This script only runs on circleci, just before the e2e tests
 # first version cfr. https://discuss.circleci.com/t/add-ability-to-cache-apt-get-programs/598/6
 
+
+if [ "$NODE_ENV" = "circleci" ]; then
+  echo "Performing circleci e2e setup because NODE_ENV is '${NODE_ENV}'";
+else
+  echo "Skipping circleci e2e setup because NODE_ENV is '${NODE_ENV}'";
+  exit;
+fi
+
 sudo apt-get install GraphicsMagick
+
+if [ ! -d "~/cache" ]; then
+  mkdir ~/cache
+fi
+
+cd ~/cache
 
 API_TARBALL_URL="https://codeload.github.com/opencollective/opencollective-api/tar.gz/";
 if curl -s --head  --request GET "${API_TARBALL_URL}${CIRCLE_BRANCH}" | grep "200" > /dev/null
