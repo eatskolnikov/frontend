@@ -7,8 +7,9 @@ dependencies:
   pre:
     - ./scripts/setup_circleci.sh
   cache_directories:
-    - "~/cache"
-    - "~/npm"
+    - ~/cache
+    - ~/.cache
+    - ~/.npm
     - node_modules
     - opencollective-api/node_modules
 machine:
